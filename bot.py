@@ -1,30 +1,32 @@
 import os
-from telegram.ext import Updater, CommandHandler
 from dotenv import load_dotenv
+from telegram import Update
+from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 
 # Load token from .env file
 load_dotenv()
 TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 
-def start(update, context):
-    update.message.reply_text("👋 Welcome to TONedu! Send /ask <topic> to learn something.")
+# /start command
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("👋 Welcome to TONedu! Send /ask <topic> to learn something.")
 
-def ask(update, context):
+# /ask command
+async def ask(update: Update, context: ContextTypes.DEFAULT_TYPE):
     topic = ' '.join(context.args)
     if topic:
-        update.message.reply_text(f"📚 AI explanation for '{topic}':\n(This is a placeholder)")
+        await update.message.reply_text(f"📚 AI explanation for '{topic}':\n(This is a placeholder)")
     else:
-        update.message.reply_text("❗Please provide a topic. Example: /ask Photosynthesis")
+        await update.message.reply_text("❗Please provide a topic. Example: /ask Photosynthesis")
 
+# Main bot runner
 def main():
-    updater = Updater(TOKEN, use_context=True)
-    dp = updater.dispatcher
+    app = ApplicationBuilder().token(TOKEN).build()
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("ask", ask))
 
-    dp.add_handler(CommandHandler("start", start))
-    dp.add_handler(CommandHandler("ask", ask))
-
-    updater.start_polling()
-    updater.idle()
+    print("🤖 BOT IS RUNNING...")
+    app.run_polling()
 
 if __name__ == "__main__":
     main()
